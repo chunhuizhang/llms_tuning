@@ -16,11 +16,11 @@ torch.manual_seed(42)
 
 dataset = load_dataset("lucasmccabe-lmi/CodeAlpaca-20k", split="train")
 
-model = AutoModelForCausalLM.from_pretrained("facebook/opt-350m", 
+model = AutoModelForCausalLM.from_pretrained("facebook/opt-2.7b", 
                                             #  device_map={"": Accelerator().process_index}
                                             # device_map={"": 0}
                                              )
-tokenizer = AutoTokenizer.from_pretrained("facebook/opt-350m")
+tokenizer = AutoTokenizer.from_pretrained("facebook/opt-2.7b")
 
 def formatting_prompts_func(example):
     output_texts = []
@@ -35,9 +35,10 @@ collator = DataCollatorForCompletionOnlyLM(response_template, tokenizer=tokenize
 args = SFTConfig(output_dir="/tmp", 
                  max_seq_length=512, 
                  num_train_epochs=2, 
-                 per_device_train_batch_size=4, 
+                 per_device_train_batch_size=8, 
                  gradient_accumulation_steps=4,
                  gradient_checkpointing=True,
+                 bf16=True
                  )
 
 trainer = SFTTrainer(
