@@ -160,12 +160,12 @@ sft_config = SFTConfig(
     save_steps=0.2,
     logging_steps=10,
     learning_rate=1e-4,
-    fp16=True,  # or bf16=True,
+    bf16=True,  # or fp16=True,
     save_strategy="steps",
     warmup_ratio=0.1,
     save_total_limit=2,
     lr_scheduler_type="constant",
-    report_to="tensorboard",
+    report_to="wandb",
     save_safetensors=True,
     dataset_kwargs={
         "add_special_tokens": False,  # We template with special tokens

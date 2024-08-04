@@ -164,3 +164,4 @@ cython_debug/
 data/
 experiments/
 Llama-3-8B-Instruct-Finance-RAG/
+wandb/
