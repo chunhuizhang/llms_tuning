@@ -165,3 +165,4 @@ data/
 experiments/
 Llama-3-8B-Instruct-Finance-RAG/
 wandb/
+trl-git/
