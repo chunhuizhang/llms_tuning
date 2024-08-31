@@ -9,8 +9,8 @@ os.environ['NCCL_IB_DISABLE'] = '1'
 
 raw_datasets = load_dataset("HuggingFaceH4/ultrachat_200k")
 raw_datasets = DatasetDict({
-    "train": raw_datasets["train_sft"],
-    "test": raw_datasets["test_sft"]
+    "train": raw_datasets["train_sft"].select(range(10000)),
+    "test": raw_datasets["test_sft"].select(range(10000))
 })
 
 
@@ -25,7 +25,7 @@ if tokenizer.pad_token_id is None:
 
 # Set reasonable default for models without max length
 if tokenizer.model_max_length > 100_000:
-    tokenizer.model_max_length = 2048
+    tokenizer.model_max_length = 1024
 
 DEFAULT_CHAT_TEMPLATE = "{% for message in messages %}\n{% if message['role'] == 'user' %}\n{{ '<|user|>\n' + message['content'] + eos_token }}\n{% elif message['role'] == 'system' %}\n{{ '<|system|>\n' + message['content'] + eos_token }}\n{% elif message['role'] == 'assistant' %}\n{{ '<|assistant|>\n'  + message['content'] + eos_token }}\n{% endif %}\n{% if loop.last and add_generation_prompt %}\n{{ '<|assistant|>' }}\n{% endif %}\n{% endfor %}"
 tokenizer.chat_template = DEFAULT_CHAT_TEMPLATE
@@ -96,7 +96,7 @@ training_args = SFTConfig(
     do_eval=True,
     eval_strategy="epoch",
     per_device_eval_batch_size=4, # originally set to 8
-    per_device_train_batch_size=4, # originally set to 8
+    per_device_train_batch_size=2, # originally set to 8
     gradient_accumulation_steps=64,
     gradient_checkpointing=True,
     gradient_checkpointing_kwargs={"use_reentrant": False},
@@ -141,4 +141,12 @@ trainer = SFTTrainer(
     )
 
 train_result = trainer.train()
+
+metrics = train_result.metrics
+max_train_samples = training_args.max_train_samples if training_args.max_train_samples is not None else len(train_dataset)
+metrics["train_samples"] = min(max_train_samples, len(train_dataset))
+trainer.log_metrics("train", metrics)
+trainer.save_metrics("train", metrics)
+trainer.save_state()
+
 
