@@ -60,6 +60,7 @@ eval_dataset = raw_datasets["test"]
 from transformers import BitsAndBytesConfig, TrainingArguments
 import torch
 from transformers import AutoModelForCausalLM
+from trl import SFTConfig
 
 # specify how to quantize the model
 quantization_config = BitsAndBytesConfig(
@@ -90,7 +91,7 @@ from transformers import TrainingArguments
 output_dir = 'data/mistral-7b-sft-lora'
 
 # based on config
-training_args = TrainingArguments(
+training_args = SFTConfig(
     fp16=True, # specify bf16=True instead when training on GPUs that support bf16
     do_eval=True,
     eval_strategy="epoch",
@@ -112,6 +113,10 @@ training_args = TrainingArguments(
     save_strategy="no",
     save_total_limit=None,
     seed=42,
+    dataset_text_field="text",
+    packing=True,
+    max_seq_length=tokenizer.model_max_length,
+    dataset_num_proc=cpu_count(),
 )
 
 # based on config
@@ -131,12 +136,8 @@ trainer = SFTTrainer(
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
-        dataset_text_field="text",
         tokenizer=tokenizer,
-        packing=True,
         peft_config=peft_config,
-        max_seq_length=tokenizer.model_max_length,
-        dataset_num_proc=cpu_count(),
     )
 
 train_result = trainer.train()
