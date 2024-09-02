@@ -1,0 +1,3 @@
+model_id,mean_toxicity,std_toxicity
+ybelkada/gpt-j-6b-sharded-bf16,0.17916585507499175,0.31152043700744864
+ybelkada/gpt-j-6b-detox,0.15938387701566742,0.29640872552969993
